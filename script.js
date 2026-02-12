@@ -79,6 +79,8 @@ function startGame() {
     gameState.coins = 0;
     gameState.timeLeft = CONFIG.GAME_DURATION;
     
+    console.log('Game Started! Duration:', CONFIG.GAME_DURATION);
+
     // Reset UI
     scoreEl.textContent = '0';
     coinsEl.textContent = '0';
