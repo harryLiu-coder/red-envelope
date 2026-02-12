@@ -1,49 +1,51 @@
-const gameContainer = document.getElementById('game-container');
-const scoreEl = document.getElementById('score');
+// Game Configuration
+const CONFIG = {
+    GAME_DURATION: 10,
+    SPAWN_RATE: 400,
+    BOMB_CHANCE: 0.15, // 15% chance for bomb
+    COIN_CHANCE: 0.8, // 80% chance for coin in envelope
+    ENVELOPE_TYPES: ['🧧', '💰', '🎁', '🏮', '🐯']
+};
+
+// DOM Elements
+const bgSlideshow = document.getElementById('bg-slideshow');
+const sosWarning = document.getElementById('sos-warning');
 const timerEl = document.getElementById('timer');
+const scoreEl = document.getElementById('score');
+const coinsEl = document.getElementById('coins');
 const gameOverModal = document.getElementById('game-over-modal');
 const finalScoreEl = document.getElementById('final-score');
+const finalCoinsEl = document.getElementById('final-coins');
 const restartBtn = document.getElementById('restart-btn');
-const playerHand = document.getElementById('player-hand');
 
-// Background Slideshow Config
-const bgSlideshow = document.getElementById('bg-slideshow');
-// Add your photo filenames here
-const bgImages = [
-    'background.jpg',
-    'photo1.jpg',
-    'photo2.jpg',
-    'photo3.jpg',
-    'photo4.jpg',
-    'photo5.jpg',
-    'photo6.jpg',
-    'photo7.jpg',
-    'photo8.jpg',
-    'photo9.jpg'
-]; 
+// Game State
+let gameState = {
+    isActive: false,
+    score: 0,
+    coins: 0,
+    timeLeft: CONFIG.GAME_DURATION,
+    intervals: {
+        game: null,
+        spawn: null,
+        slide: null,
+        bombCheck: null
+    }
+};
+
+// Background Images
+const bgImages = ['background.jpg', 'photo1.jpg', 'photo2.jpg', 'photo3.jpg'];
 let currentSlide = 0;
 
-let score = 0;
-let timeLeft = 20;
-let gameInterval;
-let spawnInterval;
-let slideInterval; // New interval for slides
-let isGameActive = false;
-
-// Config
-const SPAWN_RATE = 400; // ms between spawns
-const GAME_DURATION = 20; // seconds
-
+// Initialization
 function init() {
     initSlideshow();
     restartBtn.addEventListener('click', startGame);
     startGame();
 }
 
+// Slideshow Logic
 function initSlideshow() {
     bgSlideshow.innerHTML = '';
-    
-    // Create slide elements
     bgImages.forEach((src, index) => {
         const div = document.createElement('div');
         div.classList.add('bg-slide');
@@ -52,162 +54,171 @@ function initSlideshow() {
         bgSlideshow.appendChild(div);
     });
 
-    // Start cycling if we have multiple images
-    if (bgImages.length > 1) {
-        // Clear any existing interval to prevent duplicates
-        if (slideInterval) clearInterval(slideInterval);
-        slideInterval = setInterval(nextSlide, 3000); // Change every 3 seconds
-    }
+    if (gameState.intervals.slide) clearInterval(gameState.intervals.slide);
+    gameState.intervals.slide = setInterval(nextSlide, 3000);
 }
 
 function nextSlide() {
     const slides = document.querySelectorAll('.bg-slide');
-    if (slides.length === 0) return;
-    
+    if (slides.length < 2) return;
     slides[currentSlide].classList.remove('active');
     currentSlide = (currentSlide + 1) % slides.length;
     slides[currentSlide].classList.add('active');
 }
 
+// Game Logic
 function startGame() {
-    // Reset state
-    score = 0;
-    timeLeft = GAME_DURATION;
-    isGameActive = true;
+    // Reset State
+    gameState.isActive = true;
+    gameState.score = 0;
+    gameState.coins = 0;
+    gameState.timeLeft = CONFIG.GAME_DURATION;
     
-    // Update UI
-    scoreEl.textContent = score;
-    timerEl.textContent = timeLeft;
+    // Reset UI
+    scoreEl.textContent = '0';
+    coinsEl.textContent = '0';
+    timerEl.textContent = gameState.timeLeft;
     gameOverModal.classList.add('hidden');
+    sosWarning.classList.add('hidden');
     
-    // Clear existing envelopes
-    const envelopes = document.querySelectorAll('.envelope');
-    envelopes.forEach(e => e.remove());
+    // Clear existing elements
+    document.querySelectorAll('.envelope, .bomb, .popup').forEach(el => el.remove());
+
+    // Start Loops
+    if (gameState.intervals.game) clearInterval(gameState.intervals.game);
+    if (gameState.intervals.spawn) clearInterval(gameState.intervals.spawn);
     
-    // Start timers
-    gameInterval = setInterval(updateTimer, 1000);
-    spawnInterval = setInterval(spawnEnvelope, SPAWN_RATE);
+    gameState.intervals.game = setInterval(updateTimer, 1000);
+    gameState.intervals.spawn = setInterval(spawnItem, CONFIG.SPAWN_RATE);
 }
 
 function updateTimer() {
-    timeLeft--;
-    timerEl.textContent = timeLeft;
+    gameState.timeLeft--;
+    timerEl.textContent = gameState.timeLeft;
+    if (gameState.timeLeft <= 0) endGame();
+}
+
+function spawnItem() {
+    if (!gameState.isActive) return;
+
+    // Decide what to spawn
+    const isBomb = Math.random() < CONFIG.BOMB_CHANCE;
     
-    if (timeLeft <= 0) {
-        endGame();
+    if (isBomb) {
+        createBomb();
+    } else {
+        createEnvelope();
     }
 }
 
-function spawnEnvelope() {
-    if (!isGameActive) return;
+function createEnvelope() {
+    const el = document.createElement('div');
+    el.classList.add('envelope');
+    
+    // Content
+    const pattern = CONFIG.ENVELOPE_TYPES[Math.floor(Math.random() * CONFIG.ENVELOPE_TYPES.length)];
+    el.textContent = pattern;
+    
+    // Coin Data
+    if (Math.random() < CONFIG.COIN_CHANCE) {
+        el.dataset.coinValue = Math.floor(Math.random() * 5) + 1; // 1-5 coins
+    }
+    
+    setupFallingElement(el);
+    
+    // Interaction
+    const clickHandler = (e) => {
+        e.preventDefault();
+        if (!gameState.isActive) return;
+        
+        // Update Score
+        gameState.score++;
+        scoreEl.textContent = gameState.score;
+        showPopup(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY, '+1', 'score-popup');
 
-    const envelope = document.createElement('div');
-    envelope.classList.add('envelope');
-    envelope.textContent = '🧧';
-    
-    // Random position
-    const x = Math.random() * (window.innerWidth - 60); // Subtract width of envelope
-    envelope.style.left = `${x}px`;
-    
-    // Explicitly append to body to avoid container clipping
-    document.body.appendChild(envelope);
-    
-    // Random fall speed (between 2s and 5s)
-    const duration = Math.random() * 3 + 2;
-    envelope.style.animationDuration = `${duration}s`;
-    
-    // Click handler
-    envelope.addEventListener('mousedown', (e) => handleEnvelopeClick(e, envelope));
-    envelope.addEventListener('touchstart', (e) => handleEnvelopeClick(e, envelope)); // Mobile support
-
-    // Remove when animation ends (to keep DOM clean)
-    envelope.addEventListener('animationend', () => {
-        if (envelope.parentNode) {
-            envelope.remove();
+        // Update Coins
+        if (el.dataset.coinValue) {
+            const val = parseInt(el.dataset.coinValue);
+            gameState.coins += val;
+            coinsEl.textContent = gameState.coins;
+            showPopup(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY, `🪙 +${val}`, 'coin-popup');
         }
-    });
+
+        el.remove();
+    };
     
-    // gameContainer.appendChild(envelope); // Removed
+    el.addEventListener('mousedown', clickHandler);
+    el.addEventListener('touchstart', clickHandler);
 }
 
-function handleEnvelopeClick(e, envelope) {
-    if (!isGameActive) return;
-    e.preventDefault(); // Prevent double firing on touch devices
-
-    // Visual feedback
-    score++;
-    scoreEl.textContent = score;
+function createBomb() {
+    const el = document.createElement('div');
+    el.classList.add('bomb');
+    el.textContent = '💣';
     
-    // Show +1 effect
-    showScorePopup(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY);
+    setupFallingElement(el);
     
-    // Move hand to click position
-    moveHand(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY);
+    // Interaction
+    const clickHandler = (e) => {
+        e.preventDefault();
+        if (!gameState.isActive) return;
+        
+        // Punishment
+        gameState.score = 0;
+        gameState.coins = 0;
+        scoreEl.textContent = '0';
+        coinsEl.textContent = '0';
+        
+        // Effect
+        showPopup(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY, '💥 BOOM!', 'boom-popup');
+        sosWarning.classList.remove('hidden');
+        setTimeout(() => sosWarning.classList.add('hidden'), 1000); // Quick flash
 
-    // Remove envelope
-    envelope.remove();
+        el.remove();
+    };
+    
+    el.addEventListener('mousedown', clickHandler);
+    el.addEventListener('touchstart', clickHandler);
 }
 
-function moveHand(x, y) {
-    playerHand.style.left = `${x}px`;
-    playerHand.style.top = `${y}px`;
-    playerHand.style.bottom = 'auto'; // Override initial css
-    playerHand.style.transform = 'translate(-50%, -20%)'; // Adjust so finger tip is near click
+function setupFallingElement(el) {
+    // Position
+    const x = Math.random() * (window.innerWidth - 80);
+    el.style.left = `${x}px`;
     
-    // Trigger animation
-    playerHand.classList.remove('hand-grab');
-    void playerHand.offsetWidth; // Trigger reflow
-    playerHand.classList.add('hand-grab');
+    // Animation Speed
+    const speeds = ['fall-fast', 'fall-medium', 'fall-slow'];
+    el.classList.add(speeds[Math.floor(Math.random() * speeds.length)]);
+    
+    // Append to Body (Crucial for visibility)
+    document.body.appendChild(el);
+    
+    // Cleanup
+    el.addEventListener('animationend', () => el.remove());
 }
 
-function showScorePopup(x, y) {
-    const popup = document.createElement('div');
-    popup.classList.add('score-popup');
-    popup.textContent = '+1';
-    popup.style.left = `${x}px`;
-    popup.style.top = `${y}px`;
-    
-    gameContainer.appendChild(popup);
-    
-    popup.addEventListener('animationend', () => {
-        popup.remove();
-    });
+function showPopup(x, y, text, className) {
+    const el = document.createElement('div');
+    el.className = className;
+    el.textContent = text;
+    el.style.left = `${x}px`;
+    el.style.top = `${y}px`;
+    document.body.appendChild(el);
+    el.addEventListener('animationend', () => el.remove());
 }
 
 function endGame() {
-    isGameActive = false;
-    clearInterval(gameInterval);
-    clearInterval(spawnInterval);
-    if (bombInterval) clearTimeout(bombInterval);
-    // sosEl.classList.add('hidden'); // Removed
+    gameState.isActive = false;
+    clearInterval(gameState.intervals.game);
+    clearInterval(gameState.intervals.spawn);
     
-    finalScoreEl.textContent = score;
+    finalScoreEl.textContent = gameState.score;
+    finalCoinsEl.textContent = gameState.coins;
     gameOverModal.classList.remove('hidden');
     
-    // Trigger confetti
-    createConfetti();
+    // Confetti
+    // Simple implementation for now, could be enhanced
 }
 
-function createConfetti() {
-    const container = document.getElementById('congrats-anim');
-    container.innerHTML = ''; // Clear previous
-    
-    const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-    
-    for (let i = 0; i < 50; i++) {
-        const confetti = document.createElement('div');
-        confetti.classList.add('confetti');
-        confetti.style.left = `${Math.random() * 100}%`;
-        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-        confetti.style.animationDelay = `${Math.random() * 1}s`;
-        container.appendChild(confetti);
-    }
-}
-
-// Handle window resize
-window.addEventListener('resize', () => {
-    // Optional: adjust active envelopes if needed
-});
-
-// Start the game on load
+// Start
 init();

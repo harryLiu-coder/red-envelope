@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>红包雨大挑战</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -10,19 +10,23 @@
     <!-- Background Slideshow -->
     <div id="bg-slideshow"></div>
 
+    <!-- SOS Warning -->
+    <div id="sos-warning" class="hidden">⚠️ 炸弹来袭 SOS ⚠️</div>
+
     <div id="game-container">
         <div id="ui-layer">
-            <div class="stat-box">倒计时: <span id="timer">20</span>s</div>
-            <div class="stat-box">红包数: <span id="score">0</span></div>
+            <div class="stat-box">倒计时: <span id="timer">10</span>s</div>
+            <div class="stat-box">红包: <span id="score">0</span></div>
+            <div class="stat-box">金币: <span id="coins">0</span></div>
         </div>
-        <div id="player-hand">🖐️</div>
-        <!-- Envelopes will be spawned here -->
     </div>
 
+    <!-- Game Over Modal -->
     <div id="game-over-modal" class="hidden">
         <div class="modal-content">
             <h2>🎉 游戏结束! 🎉</h2>
-            <p>恭喜你抢到了 <span id="final-score">0</span> 个红包!</p>
+            <p>抢到红包: <span id="final-score">0</span> 个</p>
+            <p>获得金币: <span id="final-coins">0</span> 枚</p>
             <div id="congrats-anim"></div>
             <button id="restart-btn">再玩一次</button>
         </div>
