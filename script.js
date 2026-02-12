@@ -153,10 +153,10 @@ function handleEnvelopeClick(e, envelope) {
         coinScore++;
         coinsEl.textContent = coinScore;
         showCoinPopup(clientX, clientY);
-    } else {
-        // Show +1 effect for just score
-        showScorePopup(clientX, clientY);
     }
+
+    // Show +1 effect for just score
+    showScorePopup(clientX, clientY);
     
     // Move hand to click position (Removed)
     // moveHand(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY);
