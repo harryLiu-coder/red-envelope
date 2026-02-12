@@ -134,12 +134,12 @@ function spawnEnvelope() {
     }
 
     // Random position
-    const x = Math.random() * (window.innerWidth - 60); // Subtract width of envelope
+    const x = Math.random() * (window.innerWidth - 80); // Subtract width of envelope
     envelope.style.left = `${x}px`;
     
     // Random fall speed (between 2s and 5s)
     const duration = Math.random() * 3 + 2;
-    envelope.style.animationDuration = `${duration}s`;
+    envelope.style.animation = `fall ${duration}s linear forwards`;
     
     // Click handler
     envelope.addEventListener('mousedown', (e) => handleEnvelopeClick(e, envelope));
@@ -165,7 +165,7 @@ function spawnBomb() {
     
     // Random fall speed (similar to envelopes)
     const duration = Math.random() * 3 + 2;
-    bomb.style.animationDuration = `${duration}s`;
+    bomb.style.animation = `fall ${duration}s linear forwards`;
     
     bomb.addEventListener('mousedown', (e) => handleBombClick(e, bomb));
     bomb.addEventListener('touchstart', (e) => handleBombClick(e, bomb));
