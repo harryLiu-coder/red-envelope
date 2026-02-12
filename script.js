@@ -1,6 +1,6 @@
 // Game Configuration
 const CONFIG = {
-    GAME_DURATION: 30,
+    GAME_DURATION: 30, // Updated to 30 seconds
     SPAWN_RATE: 400,
     BOMB_CHANCE: 0.15, // 15% chance for bomb
     COIN_CHANCE: 0.8, // 80% chance for coin in envelope
