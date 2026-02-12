@@ -286,7 +286,7 @@ function endGame() {
     clearInterval(gameInterval);
     clearInterval(spawnInterval);
     if (bombInterval) clearTimeout(bombInterval);
-    sosEl.classList.add('hidden');
+    // sosEl.classList.add('hidden'); // Removed
     
     finalScoreEl.textContent = score;
     finalCoinsEl.textContent = coinScore;
