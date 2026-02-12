@@ -109,6 +109,9 @@ function spawnEnvelope() {
     const x = Math.random() * (window.innerWidth - 60); // Subtract width of envelope
     envelope.style.left = `${x}px`;
     
+    // Explicitly append to body to avoid container clipping
+    document.body.appendChild(envelope);
+    
     // Random fall speed (between 2s and 5s)
     const duration = Math.random() * 3 + 2;
     envelope.style.animationDuration = `${duration}s`;
@@ -124,7 +127,7 @@ function spawnEnvelope() {
         }
     });
     
-    gameContainer.appendChild(envelope);
+    // gameContainer.appendChild(envelope); // Removed
 }
 
 function handleEnvelopeClick(e, envelope) {

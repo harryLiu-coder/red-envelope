@@ -90,14 +90,17 @@ body {
 }
 
 .envelope {
-    position: absolute;
-    font-size: 50px;
+    position: fixed !important;
+    display: block !important;
+    font-size: 80px;
     cursor: pointer;
     user-select: none;
-    top: -60px; /* Start above screen */
-    animation: fall linear forwards;
-    z-index: 10;
+    top: -100px;
+    z-index: 2147483647 !important;
     transition: transform 0.1s;
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
+    pointer-events: auto !important;
+    animation: fall linear forwards;
 }
 
 .envelope:active {
