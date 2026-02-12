@@ -30,15 +30,12 @@ let coinScore = 0;
 let timeLeft = 20;
 let gameInterval;
 let spawnInterval;
-let bombInterval;
 let slideInterval; // New interval for slides
 let isGameActive = false;
 
 // Config
 const SPAWN_RATE = 400; // ms between spawns
-const GAME_DURATION = 30; // Increased duration for bomb fun
-const BOMB_CHANCE = 0.15; // Chance for bomb cycle
-const ENVELOPE_TYPES = ['🧧', '💰', '🎁', '🏮', '🐯']; // Richer patterns
+const GAME_DURATION = 20; // seconds
 
 function init() {
     initSlideshow();
@@ -96,10 +93,7 @@ function startGame() {
     // Start timers
     gameInterval = setInterval(updateTimer, 1000);
     spawnInterval = setInterval(spawnEnvelope, SPAWN_RATE);
-    // Removed scheduleNextBomb();
 }
-
-// Removed scheduleNextBomb and triggerBombSequence
 
 function updateTimer() {
     timeLeft--;
@@ -113,36 +107,26 @@ function updateTimer() {
 function spawnEnvelope() {
     if (!isGameActive) return;
 
-    // Small chance to spawn a bomb instead of an envelope (15%)
-    if (Math.random() < 0.15) {
-        spawnBomb();
-        return;
-    }
-
     const envelope = document.createElement('div');
     envelope.classList.add('envelope');
-    
-    // Richer patterns
-    const pattern = ENVELOPE_TYPES[Math.floor(Math.random() * ENVELOPE_TYPES.length)];
-    envelope.textContent = pattern;
+    envelope.textContent = '🧧';
     
     // 80% chance to have a coin
     if (Math.random() < 0.8) {
         envelope.dataset.hasCoin = 'true';
-        // Random coin value 1-5
-        envelope.dataset.coinValue = Math.floor(Math.random() * 5) + 1;
+        envelope.dataset.coinValue = 1;
     }
 
     // Random position
-    const x = Math.random() * (window.innerWidth - 80); // Subtract width of envelope
+    const x = Math.random() * (window.innerWidth - 60); // Subtract width of envelope
     envelope.style.left = `${x}px`;
     
     // Explicitly append to body to avoid container clipping
     document.body.appendChild(envelope);
     
-    // Random fall speed class
-    const speeds = ['fall-fast', 'fall-medium', 'fall-slow'];
-    envelope.classList.add(speeds[Math.floor(Math.random() * speeds.length)]);
+    // Random fall speed (between 2s and 5s)
+    const duration = Math.random() * 3 + 2;
+    envelope.style.animation = `fall ${duration}s linear forwards`;
     
     // Click handler
     envelope.addEventListener('mousedown', (e) => handleEnvelopeClick(e, envelope));
@@ -154,78 +138,6 @@ function spawnEnvelope() {
             envelope.remove();
         }
     });
-    
-    // gameContainer.appendChild(envelope); // Removed
-}
-
-function spawnBomb() {
-    const bomb = document.createElement('div');
-    bomb.classList.add('envelope', 'bomb'); // Reuse envelope physics but add bomb style
-    bomb.textContent = '💣';
-    
-    const x = Math.random() * (window.innerWidth - 80);
-    bomb.style.left = `${x}px`;
-    
-    // Explicitly append to body
-    document.body.appendChild(bomb);
-    
-    // Random fall speed class
-    const speeds = ['fall-fast', 'fall-medium', 'fall-slow'];
-    bomb.classList.add(speeds[Math.floor(Math.random() * speeds.length)]);
-    
-    bomb.addEventListener('mousedown', (e) => handleBombClick(e, bomb));
-    bomb.addEventListener('touchstart', (e) => handleBombClick(e, bomb));
-    
-    bomb.addEventListener('animationend', () => {
-        if (bomb.parentNode) bomb.remove();
-    });
-    
-    // gameContainer.appendChild(bomb); // Removed
-}
-
-function handleBombClick(e, bomb) {
-    if (!isGameActive) return;
-    e.preventDefault();
-    
-    // Reset scores
-    score = 0;
-    coinScore = 0;
-    scoreEl.textContent = 0;
-    coinsEl.textContent = 0;
-    
-    // Boom effect
-    const x = e.clientX || e.touches[0].clientX;
-    const y = e.clientY || e.touches[0].clientY;
-    
-    showBoomEffect(x, y);
-    bomb.remove();
-}
-
-function showBoomEffect(x, y) {
-    const boom = document.createElement('div');
-    boom.textContent = '💥 BOOM!';
-    boom.style.position = 'absolute';
-    boom.style.left = `${x}px`;
-    boom.style.top = `${y}px`;
-    boom.style.transform = 'translate(-50%, -50%)';
-    boom.style.fontSize = '80px';
-    boom.style.color = 'red';
-    boom.style.fontWeight = 'bold';
-    boom.style.zIndex = '100';
-    boom.style.textShadow = '0 0 10px yellow';
-    boom.style.pointerEvents = 'none';
-    
-    // Simple fade out
-    boom.animate([
-        { transform: 'translate(-50%, -50%) scale(0.5)', opacity: 1 },
-        { transform: 'translate(-50%, -50%) scale(2)', opacity: 0 }
-    ], {
-        duration: 500,
-        easing: 'ease-out'
-    });
-    
-    gameContainer.appendChild(boom);
-    setTimeout(() => boom.remove(), 500);
 }
 
 function handleEnvelopeClick(e, envelope) {
