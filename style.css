@@ -1,0 +1,208 @@
+body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif;
+    background-color: #000;
+    height: 100vh;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#bg-slideshow {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -100;
+}
+
+.bg-slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out, transform 6s linear;
+    transform: scale(1);
+}
+
+.bg-slide.active {
+    opacity: 1;
+    transform: scale(1.05); /* Gentle zoom effect */
+}
+
+#game-container {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    /* Add a semi-transparent overlay to ensure text is readable against the photo */
+    /* background: rgba(255, 255, 255, 0.2); */
+}
+
+#player-hand {
+    position: absolute;
+    font-size: 60px;
+    pointer-events: none;
+    z-index: 50;
+    transition: all 0.1s ease-out;
+    transform-origin: center bottom;
+    /* Initial position off-screen or bottom center */
+    bottom: -100px;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.hand-grab {
+    animation: grabAction 0.2s ease-in-out;
+}
+
+@keyframes grabAction {
+    0% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(0.8) rotate(-10deg); }
+    100% { transform: scale(1) rotate(0deg); }
+}
+
+#ui-layer {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    z-index: 100;
+    pointer-events: none; /* Let clicks pass through to envelopes */
+}
+
+.stat-box {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #d32f2f;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.envelope {
+    position: absolute;
+    font-size: 50px;
+    cursor: pointer;
+    user-select: none;
+    top: -60px; /* Start above screen */
+    animation: fall linear forwards;
+    z-index: 10;
+    transition: transform 0.1s;
+}
+
+.envelope:active {
+    transform: scale(0.9);
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(110vh) rotate(360deg);
+    }
+}
+
+/* Click effect */
+.score-popup {
+    position: absolute;
+    color: #ffd700;
+    font-weight: bold;
+    font-size: 24px;
+    pointer-events: none;
+    animation: floatUp 1s forwards;
+    z-index: 20;
+    text-shadow: 1px 1px 2px black;
+}
+
+@keyframes floatUp {
+    0% { transform: translateY(0) scale(1); opacity: 1; }
+    100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
+}
+
+/* Game Over Modal */
+#game-over-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.modal-content {
+    background: white;
+    padding: 40px;
+    border-radius: 20px;
+    text-align: center;
+    animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    max-width: 90%;
+    width: 300px;
+    border: 5px solid #d32f2f;
+}
+
+@keyframes popIn {
+    from { transform: scale(0); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.modal-content h2 {
+    color: #d32f2f;
+    margin-top: 0;
+}
+
+.modal-content p {
+    font-size: 24px;
+    margin: 20px 0;
+}
+
+#restart-btn {
+    background: #d32f2f;
+    color: white;
+    border: none;
+    padding: 15px 30px;
+    font-size: 18px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+}
+
+#restart-btn:hover {
+    background: #b71c1c;
+    transform: scale(1.05);
+}
+
+/* Confetti/Congrats animation */
+#congrats-anim {
+    position: relative;
+    height: 50px;
+    margin-bottom: 20px;
+}
+
+.confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background-color: #f00;
+    animation: confetti-fall 2s linear forwards;
+}
+
+@keyframes confetti-fall {
+    0% { transform: translateY(-50px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100px) rotate(720deg); opacity: 0; }
+}
