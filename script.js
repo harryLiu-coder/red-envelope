@@ -137,6 +137,9 @@ function spawnEnvelope() {
     const x = Math.random() * (window.innerWidth - 80); // Subtract width of envelope
     envelope.style.left = `${x}px`;
     
+    // Explicitly append to body to avoid container clipping
+    document.body.appendChild(envelope);
+    
     // Random fall speed (between 2s and 5s)
     const duration = Math.random() * 3 + 2;
     envelope.style.animation = `fall ${duration}s linear forwards`;
@@ -152,7 +155,7 @@ function spawnEnvelope() {
         }
     });
     
-    gameContainer.appendChild(envelope);
+    // gameContainer.appendChild(envelope); // Removed
 }
 
 function spawnBomb() {
@@ -162,6 +165,9 @@ function spawnBomb() {
     
     const x = Math.random() * (window.innerWidth - 80);
     bomb.style.left = `${x}px`;
+    
+    // Explicitly append to body
+    document.body.appendChild(bomb);
     
     // Random fall speed (similar to envelopes)
     const duration = Math.random() * 3 + 2;
@@ -174,7 +180,7 @@ function spawnBomb() {
         if (bomb.parentNode) bomb.remove();
     });
     
-    gameContainer.appendChild(bomb);
+    // gameContainer.appendChild(bomb); // Removed
 }
 
 function handleBombClick(e, bomb) {

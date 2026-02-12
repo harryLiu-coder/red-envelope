@@ -71,15 +71,16 @@ body {
 }
 
 .envelope {
-    position: absolute;
-    font-size: 80px; /* Increased size */
+    position: fixed !important; /* Changed to fixed to ignore parent relative positioning */
+    display: block !important;
+    font-size: 80px;
     cursor: pointer;
     user-select: none;
-    top: -100px; /* Start higher */
-    animation: fall linear forwards;
-    z-index: 10;
+    top: -150px;
+    z-index: 2147483647 !important; /* Max z-index */
     transition: transform 0.1s;
     filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
+    pointer-events: auto !important;
 }
 
 .bomb {
