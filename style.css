@@ -42,7 +42,30 @@ body {
     height: 100vh;
     overflow: hidden;
     /* Add a semi-transparent overlay to ensure text is readable against the photo */
-    /* background: rgba(255, 255, 255, 0.2); */
+    /* background: rgba(255, 255, 255, 0.2);
+}
+
+#sos-warning {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 50px;
+    font-weight: bold;
+    color: white;
+    background: rgba(255, 0, 0, 0.8);
+    padding: 20px 50px;
+    border-radius: 10px;
+    z-index: 200;
+    animation: flash 0.5s infinite alternate;
+    border: 5px solid yellow;
+    box-shadow: 0 0 20px red;
+    white-space: nowrap;
+}
+
+@keyframes flash {
+    from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    to { opacity: 0.5; transform: translate(-50%, -50%) scale(1.1); }
 }
 
 /* Removed hand styles */
@@ -70,13 +93,19 @@ body {
 
 .envelope {
     position: absolute;
-    font-size: 50px;
+    font-size: 80px; /* Increased size */
     cursor: pointer;
     user-select: none;
-    top: -60px; /* Start above screen */
+    top: -100px; /* Start higher */
     animation: fall linear forwards;
     z-index: 10;
     transition: transform 0.1s;
+    filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
+}
+
+.bomb {
+    font-size: 90px;
+    filter: drop-shadow(0 0 10px red);
 }
 
 .envelope:active {

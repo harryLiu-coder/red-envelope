@@ -6,7 +6,7 @@ const gameOverModal = document.getElementById('game-over-modal');
 const finalScoreEl = document.getElementById('final-score');
 const finalCoinsEl = document.getElementById('final-coins');
 const restartBtn = document.getElementById('restart-btn');
-// const playerHand = document.getElementById('player-hand'); // Removed
+const sosEl = document.getElementById('sos-warning');
 
 // Background Slideshow Config
 const bgSlideshow = document.getElementById('bg-slideshow');
@@ -30,12 +30,15 @@ let coinScore = 0;
 let timeLeft = 20;
 let gameInterval;
 let spawnInterval;
+let bombInterval;
 let slideInterval; // New interval for slides
 let isGameActive = false;
 
 // Config
 const SPAWN_RATE = 400; // ms between spawns
-const GAME_DURATION = 20; // seconds
+const GAME_DURATION = 30; // Increased duration for bomb fun
+const BOMB_CHANCE = 0.15; // Chance for bomb cycle
+const ENVELOPE_TYPES = ['🧧', '💰', '🎁', '🏮', '🐯']; // Richer patterns
 
 function init() {
     initSlideshow();
@@ -84,6 +87,7 @@ function startGame() {
     coinsEl.textContent = coinScore;
     timerEl.textContent = timeLeft;
     gameOverModal.classList.add('hidden');
+    sosEl.classList.add('hidden');
     
     // Clear existing envelopes
     const envelopes = document.querySelectorAll('.envelope');
@@ -92,6 +96,34 @@ function startGame() {
     // Start timers
     gameInterval = setInterval(updateTimer, 1000);
     spawnInterval = setInterval(spawnEnvelope, SPAWN_RATE);
+    // Schedule first bomb check
+    scheduleNextBomb();
+}
+
+function scheduleNextBomb() {
+    if (!isGameActive) return;
+    
+    // Random delay between 5-10 seconds for next bomb check
+    const delay = Math.random() * 5000 + 5000;
+    
+    bombInterval = setTimeout(() => {
+        if (!isGameActive) return;
+        triggerBombSequence();
+    }, delay);
+}
+
+function triggerBombSequence() {
+    // Show warning
+    sosEl.classList.remove('hidden');
+    
+    // Wait 3 seconds then spawn bomb
+    setTimeout(() => {
+        if (!isGameActive) return;
+        sosEl.classList.add('hidden');
+        spawnBomb();
+        // Schedule next one
+        scheduleNextBomb();
+    }, 3000);
 }
 
 function updateTimer() {
@@ -108,11 +140,16 @@ function spawnEnvelope() {
 
     const envelope = document.createElement('div');
     envelope.classList.add('envelope');
-    envelope.textContent = '🧧';
+    
+    // Richer patterns
+    const pattern = ENVELOPE_TYPES[Math.floor(Math.random() * ENVELOPE_TYPES.length)];
+    envelope.textContent = pattern;
     
     // 80% chance to have a coin
     if (Math.random() < 0.8) {
         envelope.dataset.hasCoin = 'true';
+        // Random coin value 1-5
+        envelope.dataset.coinValue = Math.floor(Math.random() * 5) + 1;
     }
 
     // Random position
@@ -137,6 +174,70 @@ function spawnEnvelope() {
     gameContainer.appendChild(envelope);
 }
 
+function spawnBomb() {
+    const bomb = document.createElement('div');
+    bomb.classList.add('envelope', 'bomb'); // Reuse envelope physics but add bomb style
+    bomb.textContent = '💣';
+    
+    const x = Math.random() * (window.innerWidth - 80);
+    bomb.style.left = `${x}px`;
+    bomb.style.animationDuration = '2s'; // Fall faster
+    
+    bomb.addEventListener('mousedown', (e) => handleBombClick(e, bomb));
+    bomb.addEventListener('touchstart', (e) => handleBombClick(e, bomb));
+    
+    bomb.addEventListener('animationend', () => {
+        if (bomb.parentNode) bomb.remove();
+    });
+    
+    gameContainer.appendChild(bomb);
+}
+
+function handleBombClick(e, bomb) {
+    if (!isGameActive) return;
+    e.preventDefault();
+    
+    // Reset scores
+    score = 0;
+    coinScore = 0;
+    scoreEl.textContent = 0;
+    coinsEl.textContent = 0;
+    
+    // Boom effect
+    const x = e.clientX || e.touches[0].clientX;
+    const y = e.clientY || e.touches[0].clientY;
+    
+    showBoomEffect(x, y);
+    bomb.remove();
+}
+
+function showBoomEffect(x, y) {
+    const boom = document.createElement('div');
+    boom.textContent = '💥 BOOM!';
+    boom.style.position = 'absolute';
+    boom.style.left = `${x}px`;
+    boom.style.top = `${y}px`;
+    boom.style.transform = 'translate(-50%, -50%)';
+    boom.style.fontSize = '80px';
+    boom.style.color = 'red';
+    boom.style.fontWeight = 'bold';
+    boom.style.zIndex = '100';
+    boom.style.textShadow = '0 0 10px yellow';
+    boom.style.pointerEvents = 'none';
+    
+    // Simple fade out
+    boom.animate([
+        { transform: 'translate(-50%, -50%) scale(0.5)', opacity: 1 },
+        { transform: 'translate(-50%, -50%) scale(2)', opacity: 0 }
+    ], {
+        duration: 500,
+        easing: 'ease-out'
+    });
+    
+    gameContainer.appendChild(boom);
+    setTimeout(() => boom.remove(), 500);
+}
+
 function handleEnvelopeClick(e, envelope) {
     if (!isGameActive) return;
     e.preventDefault(); // Prevent double firing on touch devices
@@ -150,9 +251,10 @@ function handleEnvelopeClick(e, envelope) {
     
     // Check for coin
     if (envelope.dataset.hasCoin === 'true') {
-        coinScore++;
+        const val = parseInt(envelope.dataset.coinValue);
+        coinScore += val;
         coinsEl.textContent = coinScore;
-        showCoinPopup(clientX, clientY);
+        showCoinPopup(clientX, clientY, val);
     }
 
     // Show +1 effect for just score
@@ -167,10 +269,10 @@ function handleEnvelopeClick(e, envelope) {
 
 // Removed moveHand function
 
-function showCoinPopup(x, y) {
+function showCoinPopup(x, y, val) {
     const popup = document.createElement('div');
     popup.classList.add('coin-popup');
-    popup.textContent = '🪙 +1';
+    popup.textContent = `🪙 +${val}`;
     popup.style.left = `${x}px`;
     popup.style.top = `${y}px`;
     
@@ -199,6 +301,8 @@ function endGame() {
     isGameActive = false;
     clearInterval(gameInterval);
     clearInterval(spawnInterval);
+    if (bombInterval) clearTimeout(bombInterval);
+    sosEl.classList.add('hidden');
     
     finalScoreEl.textContent = score;
     finalCoinsEl.textContent = coinScore;
