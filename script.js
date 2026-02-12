@@ -17,6 +17,8 @@ const gameOverModal = document.getElementById('game-over-modal');
 const finalScoreEl = document.getElementById('final-score');
 const finalCoinsEl = document.getElementById('final-coins');
 const restartBtn = document.getElementById('restart-btn');
+const startBtn = document.getElementById('start-btn');
+const startModal = document.getElementById('start-modal');
 
 // Game State
 let gameState = {
@@ -37,11 +39,11 @@ const bgImages = ['background.jpg', 'photo1.jpg', 'photo2.jpg', 'photo3.jpg'];
 let currentSlide = 0;
 
 // Initialization
-function init() {
+document.addEventListener('DOMContentLoaded', () => {
     initSlideshow();
     restartBtn.addEventListener('click', startGame);
-    startGame();
-}
+    startBtn.addEventListener('click', startGame);
+});
 
 // Slideshow Logic
 function initSlideshow() {
@@ -68,6 +70,9 @@ function nextSlide() {
 
 // Game Logic
 function startGame() {
+    // Hide start modal if visible
+    if (startModal) startModal.classList.add('hidden');
+
     // Reset State
     gameState.isActive = true;
     gameState.score = 0;
@@ -221,4 +226,4 @@ function endGame() {
 }
 
 // Start
-init();
+// init(); // Handled by DOMContentLoaded

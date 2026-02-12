@@ -170,8 +170,8 @@ body {
     100% { transform: translate(-50%, -50%) scale(2); opacity: 0; }
 }
 
-/* Game Over Modal */
-#game-over-modal {
+/* Start/Game Over Modal */
+#start-modal, #game-over-modal {
     position: fixed;
     top: 0;
     left: 0;
@@ -208,7 +208,7 @@ body {
 .modal-content p { font-size: 20px; margin: 15px 0; font-weight: bold; }
 .modal-content span { color: #d32f2f; font-size: 24px; }
 
-#restart-btn {
+#restart-btn, #start-btn {
     background: #d32f2f;
     color: white;
     border: none;
@@ -218,9 +218,11 @@ body {
     cursor: pointer;
     margin-top: 20px;
     transition: transform 0.2s;
+    font-weight: bold;
+    box-shadow: 0 5px 0 #b71c1c;
 }
 
-#restart-btn:active { transform: scale(0.95); }
+#restart-btn:active, #start-btn:active { transform: translateY(5px); box-shadow: none; }
 
 /* Confetti */
 #congrats-anim {
