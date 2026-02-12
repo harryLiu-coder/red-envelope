@@ -113,8 +113,12 @@ body {
 }
 
 @keyframes fall {
+    from {
+        top: -100px;
+    }
     to {
-        transform: translateY(110vh) rotate(360deg);
+        top: 110vh;
+        transform: rotate(360deg);
     }
 }
 
