@@ -140,9 +140,9 @@ function spawnEnvelope() {
     // Explicitly append to body to avoid container clipping
     document.body.appendChild(envelope);
     
-    // Random fall speed (between 2s and 5s)
-    const duration = Math.random() * 3 + 2;
-    envelope.style.animation = `fall ${duration}s linear forwards`;
+    // Random fall speed class
+    const speeds = ['fall-fast', 'fall-medium', 'fall-slow'];
+    envelope.classList.add(speeds[Math.floor(Math.random() * speeds.length)]);
     
     // Click handler
     envelope.addEventListener('mousedown', (e) => handleEnvelopeClick(e, envelope));
@@ -169,9 +169,9 @@ function spawnBomb() {
     // Explicitly append to body
     document.body.appendChild(bomb);
     
-    // Random fall speed (similar to envelopes)
-    const duration = Math.random() * 3 + 2;
-    bomb.style.animation = `fall ${duration}s linear forwards`;
+    // Random fall speed class
+    const speeds = ['fall-fast', 'fall-medium', 'fall-slow'];
+    bomb.classList.add(speeds[Math.floor(Math.random() * speeds.length)]);
     
     bomb.addEventListener('mousedown', (e) => handleBombClick(e, bomb));
     bomb.addEventListener('touchstart', (e) => handleBombClick(e, bomb));

@@ -83,6 +83,11 @@ body {
     pointer-events: auto !important;
 }
 
+/* Define different animation speeds via classes */
+.fall-fast { animation: fall 2s linear forwards; }
+.fall-medium { animation: fall 3s linear forwards; }
+.fall-slow { animation: fall 4s linear forwards; }
+
 .bomb {
     font-size: 90px;
     filter: drop-shadow(0 0 10px red);
