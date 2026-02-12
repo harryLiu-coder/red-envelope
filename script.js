@@ -6,7 +6,7 @@ const gameOverModal = document.getElementById('game-over-modal');
 const finalScoreEl = document.getElementById('final-score');
 const finalCoinsEl = document.getElementById('final-coins');
 const restartBtn = document.getElementById('restart-btn');
-const sosEl = document.getElementById('sos-warning');
+// const sosEl = document.getElementById('sos-warning'); // Removed
 
 // Background Slideshow Config
 const bgSlideshow = document.getElementById('bg-slideshow');
@@ -87,7 +87,7 @@ function startGame() {
     coinsEl.textContent = coinScore;
     timerEl.textContent = timeLeft;
     gameOverModal.classList.add('hidden');
-    sosEl.classList.add('hidden');
+    // sosEl.classList.add('hidden'); // Removed
     
     // Clear existing envelopes
     const envelopes = document.querySelectorAll('.envelope');
@@ -96,35 +96,10 @@ function startGame() {
     // Start timers
     gameInterval = setInterval(updateTimer, 1000);
     spawnInterval = setInterval(spawnEnvelope, SPAWN_RATE);
-    // Schedule first bomb check
-    scheduleNextBomb();
+    // Removed scheduleNextBomb();
 }
 
-function scheduleNextBomb() {
-    if (!isGameActive) return;
-    
-    // Random delay between 5-10 seconds for next bomb check
-    const delay = Math.random() * 5000 + 5000;
-    
-    bombInterval = setTimeout(() => {
-        if (!isGameActive) return;
-        triggerBombSequence();
-    }, delay);
-}
-
-function triggerBombSequence() {
-    // Show warning
-    sosEl.classList.remove('hidden');
-    
-    // Wait 3 seconds then spawn bomb
-    setTimeout(() => {
-        if (!isGameActive) return;
-        sosEl.classList.add('hidden');
-        spawnBomb();
-        // Schedule next one
-        scheduleNextBomb();
-    }, 3000);
-}
+// Removed scheduleNextBomb and triggerBombSequence
 
 function updateTimer() {
     timeLeft--;
@@ -137,6 +112,12 @@ function updateTimer() {
 
 function spawnEnvelope() {
     if (!isGameActive) return;
+
+    // Small chance to spawn a bomb instead of an envelope (15%)
+    if (Math.random() < 0.15) {
+        spawnBomb();
+        return;
+    }
 
     const envelope = document.createElement('div');
     envelope.classList.add('envelope');
@@ -181,7 +162,10 @@ function spawnBomb() {
     
     const x = Math.random() * (window.innerWidth - 80);
     bomb.style.left = `${x}px`;
-    bomb.style.animationDuration = '2s'; // Fall faster
+    
+    // Random fall speed (similar to envelopes)
+    const duration = Math.random() * 3 + 2;
+    bomb.style.animationDuration = `${duration}s`;
     
     bomb.addEventListener('mousedown', (e) => handleBombClick(e, bomb));
     bomb.addEventListener('touchstart', (e) => handleBombClick(e, bomb));

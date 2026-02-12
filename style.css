@@ -45,28 +45,7 @@ body {
     /* background: rgba(255, 255, 255, 0.2);
 }
 
-#sos-warning {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 50px;
-    font-weight: bold;
-    color: white;
-    background: rgba(255, 0, 0, 0.8);
-    padding: 20px 50px;
-    border-radius: 10px;
-    z-index: 200;
-    animation: flash 0.5s infinite alternate;
-    border: 5px solid yellow;
-    box-shadow: 0 0 20px red;
-    white-space: nowrap;
-}
-
-@keyframes flash {
-    from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-    to { opacity: 0.5; transform: translate(-50%, -50%) scale(1.1); }
-}
+/* Removed SOS styles */
 
 /* Removed hand styles */
 
