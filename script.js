@@ -1,12 +1,10 @@
 const gameContainer = document.getElementById('game-container');
 const scoreEl = document.getElementById('score');
-const coinsEl = document.getElementById('coins');
 const timerEl = document.getElementById('timer');
 const gameOverModal = document.getElementById('game-over-modal');
 const finalScoreEl = document.getElementById('final-score');
-const finalCoinsEl = document.getElementById('final-coins');
 const restartBtn = document.getElementById('restart-btn');
-// const sosEl = document.getElementById('sos-warning'); // Removed
+const playerHand = document.getElementById('player-hand');
 
 // Background Slideshow Config
 const bgSlideshow = document.getElementById('bg-slideshow');
@@ -26,7 +24,6 @@ const bgImages = [
 let currentSlide = 0;
 
 let score = 0;
-let coinScore = 0;
 let timeLeft = 20;
 let gameInterval;
 let spawnInterval;
@@ -75,16 +72,13 @@ function nextSlide() {
 function startGame() {
     // Reset state
     score = 0;
-    coinScore = 0;
     timeLeft = GAME_DURATION;
     isGameActive = true;
     
     // Update UI
     scoreEl.textContent = score;
-    coinsEl.textContent = coinScore;
     timerEl.textContent = timeLeft;
     gameOverModal.classList.add('hidden');
-    // sosEl.classList.add('hidden'); // Removed
     
     // Clear existing envelopes
     const envelopes = document.querySelectorAll('.envelope');
@@ -111,22 +105,13 @@ function spawnEnvelope() {
     envelope.classList.add('envelope');
     envelope.textContent = '🧧';
     
-    // 80% chance to have a coin
-    if (Math.random() < 0.8) {
-        envelope.dataset.hasCoin = 'true';
-        envelope.dataset.coinValue = 1;
-    }
-
     // Random position
     const x = Math.random() * (window.innerWidth - 60); // Subtract width of envelope
     envelope.style.left = `${x}px`;
     
-    // Explicitly append to body to avoid container clipping
-    document.body.appendChild(envelope);
-    
     // Random fall speed (between 2s and 5s)
     const duration = Math.random() * 3 + 2;
-    envelope.style.animation = `fall ${duration}s linear forwards`;
+    envelope.style.animationDuration = `${duration}s`;
     
     // Click handler
     envelope.addEventListener('mousedown', (e) => handleEnvelopeClick(e, envelope));
@@ -138,6 +123,8 @@ function spawnEnvelope() {
             envelope.remove();
         }
     });
+    
+    gameContainer.appendChild(envelope);
 }
 
 function handleEnvelopeClick(e, envelope) {
@@ -147,42 +134,27 @@ function handleEnvelopeClick(e, envelope) {
     // Visual feedback
     score++;
     scoreEl.textContent = score;
-
-    const clientX = e.clientX || e.touches[0].clientX;
-    const clientY = e.clientY || e.touches[0].clientY;
     
-    // Check for coin
-    if (envelope.dataset.hasCoin === 'true') {
-        const val = parseInt(envelope.dataset.coinValue);
-        coinScore += val;
-        coinsEl.textContent = coinScore;
-        showCoinPopup(clientX, clientY, val);
-    }
-
-    // Show +1 effect for just score
-    showScorePopup(clientX, clientY);
+    // Show +1 effect
+    showScorePopup(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY);
     
-    // Move hand to click position (Removed)
-    // moveHand(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY);
+    // Move hand to click position
+    moveHand(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY);
 
     // Remove envelope
     envelope.remove();
 }
 
-// Removed moveHand function
-
-function showCoinPopup(x, y, val) {
-    const popup = document.createElement('div');
-    popup.classList.add('coin-popup');
-    popup.textContent = `🪙 +${val}`;
-    popup.style.left = `${x}px`;
-    popup.style.top = `${y}px`;
+function moveHand(x, y) {
+    playerHand.style.left = `${x}px`;
+    playerHand.style.top = `${y}px`;
+    playerHand.style.bottom = 'auto'; // Override initial css
+    playerHand.style.transform = 'translate(-50%, -20%)'; // Adjust so finger tip is near click
     
-    gameContainer.appendChild(popup);
-    
-    popup.addEventListener('animationend', () => {
-        popup.remove();
-    });
+    // Trigger animation
+    playerHand.classList.remove('hand-grab');
+    void playerHand.offsetWidth; // Trigger reflow
+    playerHand.classList.add('hand-grab');
 }
 
 function showScorePopup(x, y) {
@@ -207,7 +179,6 @@ function endGame() {
     // sosEl.classList.add('hidden'); // Removed
     
     finalScoreEl.textContent = score;
-    finalCoinsEl.textContent = coinScore;
     gameOverModal.classList.remove('hidden');
     
     // Trigger confetti
