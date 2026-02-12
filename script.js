@@ -1,10 +1,12 @@
 const gameContainer = document.getElementById('game-container');
 const scoreEl = document.getElementById('score');
+const coinsEl = document.getElementById('coins');
 const timerEl = document.getElementById('timer');
 const gameOverModal = document.getElementById('game-over-modal');
 const finalScoreEl = document.getElementById('final-score');
+const finalCoinsEl = document.getElementById('final-coins');
 const restartBtn = document.getElementById('restart-btn');
-const playerHand = document.getElementById('player-hand');
+// const playerHand = document.getElementById('player-hand'); // Removed
 
 // Background Slideshow Config
 const bgSlideshow = document.getElementById('bg-slideshow');
@@ -24,6 +26,7 @@ const bgImages = [
 let currentSlide = 0;
 
 let score = 0;
+let coinScore = 0;
 let timeLeft = 20;
 let gameInterval;
 let spawnInterval;
@@ -72,11 +75,13 @@ function nextSlide() {
 function startGame() {
     // Reset state
     score = 0;
+    coinScore = 0;
     timeLeft = GAME_DURATION;
     isGameActive = true;
     
     // Update UI
     scoreEl.textContent = score;
+    coinsEl.textContent = coinScore;
     timerEl.textContent = timeLeft;
     gameOverModal.classList.add('hidden');
     
@@ -105,6 +110,11 @@ function spawnEnvelope() {
     envelope.classList.add('envelope');
     envelope.textContent = '🧧';
     
+    // 80% chance to have a coin
+    if (Math.random() < 0.8) {
+        envelope.dataset.hasCoin = 'true';
+    }
+
     // Random position
     const x = Math.random() * (window.innerWidth - 60); // Subtract width of envelope
     envelope.style.left = `${x}px`;
@@ -134,27 +144,41 @@ function handleEnvelopeClick(e, envelope) {
     // Visual feedback
     score++;
     scoreEl.textContent = score;
+
+    const clientX = e.clientX || e.touches[0].clientX;
+    const clientY = e.clientY || e.touches[0].clientY;
     
-    // Show +1 effect
-    showScorePopup(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY);
+    // Check for coin
+    if (envelope.dataset.hasCoin === 'true') {
+        coinScore++;
+        coinsEl.textContent = coinScore;
+        showCoinPopup(clientX, clientY);
+    } else {
+        // Show +1 effect for just score
+        showScorePopup(clientX, clientY);
+    }
     
-    // Move hand to click position
-    moveHand(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY);
+    // Move hand to click position (Removed)
+    // moveHand(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY);
 
     // Remove envelope
     envelope.remove();
 }
 
-function moveHand(x, y) {
-    playerHand.style.left = `${x}px`;
-    playerHand.style.top = `${y}px`;
-    playerHand.style.bottom = 'auto'; // Override initial css
-    playerHand.style.transform = 'translate(-50%, -20%)'; // Adjust so finger tip is near click
+// Removed moveHand function
+
+function showCoinPopup(x, y) {
+    const popup = document.createElement('div');
+    popup.classList.add('coin-popup');
+    popup.textContent = '🪙 +1';
+    popup.style.left = `${x}px`;
+    popup.style.top = `${y}px`;
     
-    // Trigger animation
-    playerHand.classList.remove('hand-grab');
-    void playerHand.offsetWidth; // Trigger reflow
-    playerHand.classList.add('hand-grab');
+    gameContainer.appendChild(popup);
+    
+    popup.addEventListener('animationend', () => {
+        popup.remove();
+    });
 }
 
 function showScorePopup(x, y) {
@@ -177,6 +201,7 @@ function endGame() {
     clearInterval(spawnInterval);
     
     finalScoreEl.textContent = score;
+    finalCoinsEl.textContent = coinScore;
     gameOverModal.classList.remove('hidden');
     
     // Trigger confetti

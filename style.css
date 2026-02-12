@@ -45,28 +45,7 @@ body {
     /* background: rgba(255, 255, 255, 0.2); */
 }
 
-#player-hand {
-    position: absolute;
-    font-size: 60px;
-    pointer-events: none;
-    z-index: 50;
-    transition: all 0.1s ease-out;
-    transform-origin: center bottom;
-    /* Initial position off-screen or bottom center */
-    bottom: -100px;
-    left: 50%;
-    transform: translateX(-50%);
-}
-
-.hand-grab {
-    animation: grabAction 0.2s ease-in-out;
-}
-
-@keyframes grabAction {
-    0% { transform: scale(1) rotate(0deg); }
-    50% { transform: scale(0.8) rotate(-10deg); }
-    100% { transform: scale(1) rotate(0deg); }
-}
+/* Removed hand styles */
 
 #ui-layer {
     position: absolute;
@@ -120,6 +99,23 @@ body {
     animation: floatUp 1s forwards;
     z-index: 20;
     text-shadow: 1px 1px 2px black;
+}
+
+.coin-popup {
+    position: absolute;
+    color: #ffd700;
+    font-size: 40px;
+    pointer-events: none;
+    z-index: 25;
+    animation: coinJump 0.8s ease-out forwards;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
+
+@keyframes coinJump {
+    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+    30% { transform: translate(-50%, -100px) scale(1.2); opacity: 1; }
+    70% { transform: translate(-50%, -80px) scale(1); opacity: 1; }
+    100% { transform: translate(-50%, -150px) scale(0.8); opacity: 0; }
 }
 
 @keyframes floatUp {
